@@ -1,0 +1,8 @@
+parameters:
+    jsontable.type.class: Zema\Bundle\JsontableBundle\Form\Type\JsontableType
+
+services:
+    zema888.type.jsontable:
+        class: %jsontable.type.class%
+        tags:
+            - {name: form.type, alias: jsontable }

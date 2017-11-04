@@ -1,0 +1,108 @@
+{# Виджет "JSON array to table" #}
+
+{% block jsontable_widget %}
+
+    <table class="table table-bordered">
+        <thead>
+        {% for label in labeles %}
+            <th>{{ label }}</th>
+        {% endfor %}
+        <td><span></span></td>
+        </thead>
+        <tbody>
+        {% for key_row, row in value %}
+            <tr>
+                {% for field in keys %}
+                    <td><input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                               class="form-control"
+                               value="{% if row[field] is defined %}{{ row[field] }}{% endif %}"/></td>
+                {% endfor %}
+                <td style="text-align: center;padding-top: 15px;">
+                    {% if fixed_row == false %}
+                        <a href="javascript:void(0);"
+                           data-min="{{ min }}"
+                           data-max="{{ max }}"
+                           {% if min > 0 and min <= (value | length )%}disabled="disabled"{% endif %}
+                           class="js_minus_{{ field_name }}">
+                            <i class="fa fa-minus-circle"></i>
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        {% if min > (value | length ) %}
+            {% for key_row in range((value | length ), min - 1) %}
+                <tr>
+                    {% for field in keys %}
+                        <td><input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                                   class="form-control"
+                                   value=""/></td>
+                    {% endfor %}
+                    <td style="text-align: center;padding-top: 15px;">
+                        {% if fixed_row == false %}
+                            <a href="javascript:void(0);"
+                               data-min="{{ min }}"
+                               data-max="{{ max }}"
+                               class="js_minus_{{ field_name }}">
+                                <i class="fa fa-minus-circle"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+    <div>
+        {% if fixed_row == false %}
+            <a href="javascript:void(0);"
+               class="js_add_{{ field_name }}"
+               {% if max > 0 and max >= (value | length )%}disabled="disabled"{% endif %}
+               data-min="{{ min }}"
+               data-max="{{ max }}">
+                <i class="fa fa-plus-circle"></i> {{ 'link_action_create'|trans({}, 'SonataAdminBundle') }}
+            </a>
+        {% endif %}
+    </div>
+    <script>
+        $(function () {
+            var new_line = '<tr>\
+                {% for field in keys %} \
+                <td><input name="{{ form_name }}[{{ field_name }}][999][{{ field }}]" class="form-control" value=""/></td> \
+                {% endfor %} \
+                <td style="text-align: center;padding-top: 15px;"><a href="javascript:void(0);" class="js_minus_{{ field_name }}" data-min="{{ min }}" data-max="{{ max }}"><i class="fa fa-minus-circle"></i></a></tr>';
+            $(document).on('click', '.js_minus_{{ field_name }}', function () {
+                var min = $(this).data('min');
+                var count = $(this).closest('.form-group').find('tbody').find('tr').length;
+                if (min == 0 || count > min) {
+                    $(this).closest('tr').remove();
+                    recalcInputsNames($(this).closest('.form-group').find('tbody'));
+                    $('.js_add_{{ field_name }}').removeAttr('disabled');
+                } else {
+                    $('.js_minus_{{ field_name }}').attr('disabled', 'disabled');
+                }
+            });
+            $(document).on('click', '.js_add_{{ field_name }}', function () {
+                var min = $(this).data('min');
+                var max = $(this).data('max');
+                var count = $(this).closest('.form-group').find('tbody').find('tr').length;
+                if (max == 0 || max > count) {
+                    $(this).closest('.form-group').find('tbody').append(new_line);
+                    recalcInputsNames($(this).closest('.form-group').find('tbody'));
+                    $('.js_minus_{{ field_name }}').removeAttr('disabled');
+                } else {
+                    $(this).attr('disabled', 'disabled');
+                }
+            });
+            function recalcInputsNames($tbody) {
+                $tbody.find('tr').each(function (key) {
+                    $(this).find('input').each(function () {
+                        var re = /^({{ form_name }}\[{{ field_name }}\]\[)\d+(\]\[.+\])/g;
+                        var obj = $(this);
+                        obj.attr('name', obj.attr('name').replace(re, '$1' + key + '$2'));
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock jsontable_widget %}
