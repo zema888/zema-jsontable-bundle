@@ -25,7 +25,7 @@ Installation
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/zema888/zema-tree-bundle.git"
+            "url": "https://github.com/zema888/zema-jsontable-bundle.git"
         }
     ]
     
