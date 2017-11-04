@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "A bundle providing form type for edit array for symfony2",
     "keywords": ["symfony", "form", "type", "array", "json"],
-    "homepage": "https://github.com/zema888/JsontableBundle.git",
+    "homepage": "https://github.com/zema888/zema-tree-bundle.git",
     "license": "MIT",
     "authors": [
         {

@@ -19,8 +19,17 @@ Installation
 2. Run the composter to download the bundle:
 
     php composer.phar update zema888/zema-jsontable-bundle
+
+3. Add address to composer.json
+
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/zema888/zema-tree-bundle.git"
+        }
+    ]
     
-3. Register this bundle to your app/AppKernel.php:
+4. Register this bundle to your app/AppKernel.php:
 
     ```
     // app/AppKernel.php
@@ -32,7 +41,7 @@ Installation
             // ...
         );
     }
-4. Add to twig configuration in config.yml
+5. Add to twig configuration in config.yml
 
 # Twig Configuration
 twig:
