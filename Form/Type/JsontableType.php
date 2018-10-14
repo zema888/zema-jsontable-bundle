@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -27,13 +28,10 @@ class JsontableType extends AbstractType
 
     }
 
-    /**
-     * Дефолтные значения
-     *
-     * @param OptionsResolverInterface $resolver
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
+        parent::configureOptions($resolver);
+
         $resolver->setOptional(array(
             'keys',
             'labeles',
@@ -50,6 +48,23 @@ class JsontableType extends AbstractType
             'min' => 0,
             'max' => 0
         ));
+    }
+
+    public function getBlockPrefix()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Дефолтные значения
+     *
+     *  NEXT_MAJOR: Remove method, when bumping requirements to SF 2.7+.
+     * {@inheritdoc}
+     * @param OptionsResolverInterface $resolver
+     */
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $this->configureOptions($resolver);
     }
 
     /**
@@ -84,12 +99,12 @@ class JsontableType extends AbstractType
     }
 
     /**
-     * Имя виджета
+     * NEXT_MAJOR: Remove when dropping Symfony <2.8 support.
      *
-     * @return string
+     * {@inheritdoc}
      */
     public function getName()
     {
-        return $this->name;
+        return $this->getBlockPrefix();
     }
 }
