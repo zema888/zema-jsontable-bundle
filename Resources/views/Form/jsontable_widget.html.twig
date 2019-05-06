@@ -15,7 +15,7 @@
                 {% for field in keys %}
                     <td>
                         {% if field in texts %}
-                            {% set id = {{ form_name }}_{{ field_name }}_{{ key_row }}_{{ field }} %}
+                            {% set id = form_name ~ '_' ~ field_name ~ '_' ~ key_row ~ '_' ~ field }} %}
                             <div class="sonata-ba-field sonata-ba-field-standard-natural">
                                 <textarea id="{{ id }}" name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]" class="ckeditor">
                                     {% if row[field] is defined %}{{ row[field] }}{% endif %}
