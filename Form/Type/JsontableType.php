@@ -39,6 +39,7 @@ class JsontableType extends AbstractType
             'keys',
             'labeles',
             'fixed_row',
+            'texts',
             'min',
             'max'
         ));
@@ -48,6 +49,7 @@ class JsontableType extends AbstractType
             'multiple'  => true,
             'expanded'  => true,
             'fixed_row' => false,
+            'texts' => array(),
             'min' => 0,
             'max' => 0
         ));
@@ -82,6 +84,7 @@ class JsontableType extends AbstractType
         $view->vars['field_name'] = $form->getName();
         $view->vars['form_name'] = $form->getParent()->getName();
         $view->vars['keys'] = $options['keys'];
+        $view->vars['texts'] = $options['texts'];
         $view->vars['labeles'] = $options['labeles'];
         $view->vars['fixed_row'] = $options['fixed_row'];
         $view->vars['min'] = $options['min'];
