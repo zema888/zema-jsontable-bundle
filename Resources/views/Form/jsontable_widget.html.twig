@@ -20,15 +20,17 @@
                         {% if field in texts %}
                             {% set id = form_name ~ '_' ~ field_name ~ '_' ~ key_row ~ '_' ~ field %}
                             <div class="sonata-ba-field sonata-ba-field-standard-natural">
-                                <textarea id="{{ id }}" name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]" class="ckeditor js-ckeditor">
+                                <textarea id="{{ id }}"
+                                          name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                                          class="ckeditor js-ckeditor">
                                     {% if row[field] is defined %}{{ row[field] }}{% endif %}
                                 </textarea>
 
                             </div>
                         {% else %}
-                        <input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
-                               class="form-control"
-                               value="{% if row[field] is defined %}{{ row[field] }}{% endif %}"/>
+                            <input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                                   class="form-control"
+                                   value="{% if row[field] is defined %}{{ row[field] }}{% endif %}"/>
                         {% endif %}
                     </td>
                 {% endfor %}
@@ -37,7 +39,7 @@
                         <a href="javascript:void(0);"
                            data-min="{{ min }}"
                            data-max="{{ max }}"
-                           {% if min > 0 and min <= (value | length )%}disabled="disabled"{% endif %}
+                           {% if min > 0 and min <= (value | length ) %}disabled="disabled"{% endif %}
                            class="js_minus_{{ field_name }}">
                             <i class="fa fa-minus-circle"></i>
                         </a>
@@ -49,9 +51,22 @@
             {% for key_row in range((value | length ), min - 1) %}
                 <tr>
                     {% for field in keys %}
-                        <td><input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
-                                   class="form-control"
-                                   value=""/></td>
+                        <td>
+                            {% if field in texts %}
+                                {% set id = form_name ~ '_' ~ field_name ~ '_' ~ key_row ~ '_' ~ field %}
+                                <div class="sonata-ba-field sonata-ba-field-standard-natural">
+                                <textarea id="{{ id }}"
+                                          name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                                          class="ckeditor js-ckeditor">
+                                </textarea>
+
+                                </div>
+                            {% else %}
+                                <input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
+                                       class="form-control"
+                                       value=""/>
+                            {% endif %}
+                        </td>
                     {% endfor %}
                     <td style="text-align: center;padding-top: 15px;">
                         {% if fixed_row == false %}
@@ -72,7 +87,7 @@
         {% if fixed_row == false %}
             <a href="javascript:void(0);"
                class="js_add_{{ field_name }}"
-               {% if max > 0 and max >= (value | length )%}disabled="disabled"{% endif %}
+               {% if max > 0 and max >= (value | length ) %}disabled="disabled"{% endif %}
                data-min="{{ min }}"
                data-max="{{ max }}">
                 <i class="fa fa-plus-circle"></i> {{ 'link_action_create'|trans({}, 'SonataAdminBundle') }}
@@ -83,13 +98,26 @@
         $(function () {
             var new_line = '<tr>\
                 {% for field in keys %} \
+                 {% if field in texts %}\
+                 {% set id = form_name ~ '_' ~ field_name ~ '_999_' ~ field %}\
+                 <td><div class="sonata-ba-field sonata-ba-field-standard-natural"><textarea id="{{ id }}" name="{{ form_name }}[{{ field_name }}][999][{{ field }}]" class="ckeditor js-ckeditor"></textarea></div></td>\
+                {% else %}\
                 <td><input name="{{ form_name }}[{{ field_name }}][999][{{ field }}]" class="form-control" value=""/></td> \
+                {% endif %}\
                 {% endfor %} \
                 <td style="text-align: center;padding-top: 15px;"><a href="javascript:void(0);" class="js_minus_{{ field_name }}" data-min="{{ min }}" data-max="{{ max }}"><i class="fa fa-minus-circle"></i></a></tr>';
             $(document).on('click', '.js_minus_{{ field_name }}', function () {
                 var min = $(this).data('min');
                 var count = $(this).closest('.form-group').find('tbody').find('tr').length;
                 if (min == 0 || count > min) {
+                    $(this).closest('tr').find('textarea').each(function () {
+                        var obj = $(this);
+                        var id = obj.attr('id');
+                        if (id && CKEDITOR.instances[id]) {
+                            CKEDITOR.instances[id].destroy(true);
+                            delete CKEDITOR.instances[id];
+                        }
+                    });
                     $(this).closest('tr').remove();
                     recalcInputsNames($(this).closest('.form-group').find('tbody'));
                     $('.js_add_{{ field_name }}').removeAttr('disabled');
@@ -109,12 +137,26 @@
                     $(this).attr('disabled', 'disabled');
                 }
             });
+
             function recalcInputsNames($tbody) {
                 $tbody.find('tr').each(function (key) {
-                    $(this).find('input').each(function () {
+                    $(this).find('input, textarea').each(function () {
                         var re = /^({{ form_name }}\[{{ field_name }}\]\[)\d+(\]\[.+\])/g;
+                        var reId = /^({{ form_name }}_{{ field_name }}_)\d+(_.+)/g;
                         var obj = $(this);
-                        obj.attr('name', obj.attr('name').replace(re, '$1' + key + '$2'));
+                        var oldName = obj.attr('name');
+                        var newName = oldName.replace(re, '$1' + key + '$2');
+                        if (oldName != newName) {
+                            obj.attr('name', newName);
+                            var id = obj.attr('id');
+                            if (id) {
+                                if (CKEDITOR.instances[id]) {
+                                    CKEDITOR.instances[id].destroy(true);
+                                    delete CKEDITOR.instances[id];
+                                }
+                                obj.attr('id', id.replace(reId, '$1' + key + '$2'));
+                            }
+                        }
                     });
                 });
                 initCkeditor();
@@ -123,29 +165,29 @@
             function initCkeditor() {
                 $('.js-ckeditor').each(function (key, obj) {
                     var id = $(obj).attr('id');
-                });
-                if (CKEDITOR.instances[id]) {
-                    CKEDITOR.instances[id].destroy(true);
-                    delete CKEDITOR.instances[id];
-                }
+                    if (!CKEDITOR.instances[id]) {
 
-                var fos_ckeditor = CKEDITOR.replace(id, {
-                    "language": "ru",
-                    "toolbar": [["Source"], ["youtube", "Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"], ["Find", "Replace"], "\/", ["Bold", "Italic", "Subscript", "Superscript", "-", "RemoveFormat"], ["NumberedList", "BulletedList", "-", "Outdent", "Indent", "-", "Blockquote", "CreateDiv", "-", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock", "-", "BidiLtr", "BidiRtl"], ["Link", "Unlink", "Anchor"], "\/", ["Image", "Table", "Iframe", "SpecialChar"], ["Format"], ["Maximize", "ShowBlocks"], ["About"]],
-                    "uiColor": "#C0C0C0",
-                    "startup_outline_blocks": true,
-                    "width": "100%",
-                    "height": 300,
-                    "enterMode": CKEDITOR.ENTER_P,
-                    "allowedContent": true,
-                    "extraAllowedContent": ["script"],
-                    "autoParagraph": true,
-                    "filebrowserBrowseUrl": "\/elfinder"
-                });
-                fos_ckeditor.on('change', function () {
-                    fos_ckeditor.updateElement();
+                        var fos_ckeditor = CKEDITOR.replace(id, {
+                            "language": "ru",
+                            "toolbar": [["Source"], ["youtube", "Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"], ["Find", "Replace"], "\/", ["Bold", "Italic", "Subscript", "Superscript", "-", "RemoveFormat"], ["NumberedList", "BulletedList", "-", "Outdent", "Indent", "-", "Blockquote", "CreateDiv", "-", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock", "-", "BidiLtr", "BidiRtl"], ["Link", "Unlink", "Anchor"], "\/", ["Image", "Table", "Iframe", "SpecialChar"], ["Format"], ["Maximize", "ShowBlocks"], ["About"]],
+                            "uiColor": "#C0C0C0",
+                            "startup_outline_blocks": true,
+                            "width": "100%",
+                            "height": 300,
+                            "enterMode": CKEDITOR.ENTER_P,
+                            "allowedContent": true,
+                            "extraAllowedContent": ["script"],
+                            "autoParagraph": true,
+                            "filebrowserBrowseUrl": "\/elfinder"
+                        });
+                        fos_ckeditor.on('change', function () {
+                            fos_ckeditor.updateElement();
+                        });
+                    }
                 });
             }
+
+            initCkeditor();
         });
     </script>
 {% endblock jsontable_widget %}
