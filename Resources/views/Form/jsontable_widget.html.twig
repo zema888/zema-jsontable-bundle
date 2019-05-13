@@ -1,7 +1,10 @@
 {# Виджет "JSON array to table" #}
 
 {% block jsontable_widget %}
-
+    <script type="text/javascript">
+        var CKEDITOR_BASEPATH = "/bundles/fosckeditor/";
+    </script>
+    <script type="text/javascript" src="/bundles/fosckeditor/ckeditor.js"></script>
     <table class="table table-bordered">
         <thead>
         {% for label in labeles %}
@@ -17,42 +20,10 @@
                         {% if field in texts %}
                             {% set id = form_name ~ '_' ~ field_name ~ '_' ~ key_row ~ '_' ~ field %}
                             <div class="sonata-ba-field sonata-ba-field-standard-natural">
-                                <textarea id="{{ id }}" name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]" class="ckeditor">
+                                <textarea id="{{ id }}" name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]" class="ckeditor js-ckeditor">
                                     {% if row[field] is defined %}{{ row[field] }}{% endif %}
                                 </textarea>
 
-                                <script type="text/javascript">
-                                    var CKEDITOR_BASEPATH = "/bundles/fosckeditor/";
-                                </script>
-                                <script type="text/javascript" src="/bundles/fosckeditor/ckeditor.js"></script>
-                                <script type="text/javascript">
-
-
-                                    if (CKEDITOR.instances["{{ id }}"]) {
-                                        CKEDITOR.instances["{{ id }}"].destroy(true);
-                                        delete CKEDITOR.instances["{{ id }}"];
-                                    }
-
-
-                                    var fos_ckeditor_{{ id }} = CKEDITOR.replace("{{ id }}", {
-                                        "language": "ru",
-                                        "toolbar": [["Source"], ["youtube", "Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"], ["Find", "Replace"], "\/", ["Bold", "Italic", "Subscript", "Superscript", "-", "RemoveFormat"], ["NumberedList", "BulletedList", "-", "Outdent", "Indent", "-", "Blockquote", "CreateDiv", "-", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock", "-", "BidiLtr", "BidiRtl"], ["Link", "Unlink", "Anchor"], "\/", ["Image", "Table", "Iframe", "SpecialChar"], ["Format"], ["Maximize", "ShowBlocks"], ["About"]],
-                                        "uiColor": "#C0C0C0",
-                                        "startup_outline_blocks": true,
-                                        "width": "100%",
-                                        "height": 300,
-                                        "enterMode": CKEDITOR.ENTER_P,
-                                        "allowedContent": true,
-                                        "extraAllowedContent": ["script"],
-                                        "autoParagraph": true,
-                                        "filebrowserBrowseUrl": "\/elfinder"
-                                    });
-                                    fos_ckeditor_{{ id }}.on('change', function () {
-                                        fos_ckeditor_{{ id }}.updateElement();
-                                    });
-
-
-                                </script>
                             </div>
                         {% else %}
                         <input name="{{ form_name }}[{{ field_name }}][{{ key_row }}][{{ field }}]"
@@ -145,6 +116,34 @@
                         var obj = $(this);
                         obj.attr('name', obj.attr('name').replace(re, '$1' + key + '$2'));
                     });
+                });
+                initCkeditor();
+            }
+
+            function initCkeditor() {
+                $('.js-ckeditor').each(function (key, obj) {
+                    var id = $(obj).attr('id');
+                });
+                if (CKEDITOR.instances[id]) {
+                    CKEDITOR.instances[id].destroy(true);
+                    delete CKEDITOR.instances[id];
+                }
+
+                var fos_ckeditor = CKEDITOR.replace(id, {
+                    "language": "ru",
+                    "toolbar": [["Source"], ["youtube", "Cut", "Copy", "Paste", "PasteText", "PasteFromWord", "-", "Undo", "Redo"], ["Find", "Replace"], "\/", ["Bold", "Italic", "Subscript", "Superscript", "-", "RemoveFormat"], ["NumberedList", "BulletedList", "-", "Outdent", "Indent", "-", "Blockquote", "CreateDiv", "-", "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock", "-", "BidiLtr", "BidiRtl"], ["Link", "Unlink", "Anchor"], "\/", ["Image", "Table", "Iframe", "SpecialChar"], ["Format"], ["Maximize", "ShowBlocks"], ["About"]],
+                    "uiColor": "#C0C0C0",
+                    "startup_outline_blocks": true,
+                    "width": "100%",
+                    "height": 300,
+                    "enterMode": CKEDITOR.ENTER_P,
+                    "allowedContent": true,
+                    "extraAllowedContent": ["script"],
+                    "autoParagraph": true,
+                    "filebrowserBrowseUrl": "\/elfinder"
+                });
+                fos_ckeditor.on('change', function () {
+                    fos_ckeditor.updateElement();
                 });
             }
         });
